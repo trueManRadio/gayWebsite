@@ -168,6 +168,8 @@ Map<String, String> trackNames = {
       "Evangelion - opening",
   "a4-kids-right-version-gachi-remix.mp3": "A4- kids",
   "cmh-x-gspd-sessiya-right-versiongachi-remix.mp3": "cmh.x, GSPD - сессия",
+  "louis-armstrong-what-a-wonderful-world-right-version.mp3": "Louis Armstrong - what a wonderful world",
+  "platters-feat-boynextdoor-sixteen-slaves.mp3": "The Platters - Sixteen Tons",
 };
 
 Map<GayWave, List<String>> waveContents = {
@@ -212,6 +214,8 @@ Map<GayWave, List<String>> waveContents = {
     "verka-serdyucka-gulyanocka-right-version-g-man.mp3",
     "ya-kak-dungeon-master-tomas.mp3",
     "ya-kogda-nibud-uidu-feel-good-inc-by-checkoff.mp3",
+    "louis-armstrong-what-a-wonderful-world-right-version.mp3",
+    "platters-feat-boynextdoor-sixteen-slaves.mp3",
   ],
   GayWave.sadGay: [
     "4-pacana-ix-bylo-cetvero-right-version-gachi-remix.mp3",
