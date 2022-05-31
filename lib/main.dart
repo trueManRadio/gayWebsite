@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kplayer/kplayer.dart';
-import 'package:mini_music_visualizer/mini_music_visualizer.dart';
 import 'package:provider/provider.dart';
+import 'package:truemanradio/player_widget.dart';
 import 'package:truemanradio/player.dart';
 
 // There's nothing hard to do, so I was too lazy to use OOP...
@@ -221,93 +221,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   Consumer<GayPlayer>(
                     builder: (context, value, child) =>
                         (value.wave != GayWave.none)
-                            ? Container(
-                                padding: const EdgeInsets.all(20),
-                                decoration: const BoxDecoration(
-                                  color: Colors.black,
-                                ),
-                                width: MediaQuery.of(context).size.width,
-                                child: Row(
-                                  children: [
-                                    if (value.wave == GayWave.gay)
-                                      Text(
-                                        "GAY",
-                                        style: GoogleFonts.montserrat(
-                                          fontWeight: FontWeight.w900,
-                                          fontSize: 24,
-                                          color: Colors.blueGrey,
-                                        ),
-                                      ),
-                                    if (value.wave == GayWave.trueGay)
-                                      Text(
-                                        "TRUE GAY",
-                                        style: GoogleFonts.oswald(
-                                          fontWeight: FontWeight.w900,
-                                          fontStyle: FontStyle.italic,
-                                          fontSize: 24,
-                                          color: Colors.purpleAccent,
-                                        ),
-                                      ),
-                                    if (value.wave == GayWave.sadGay)
-                                      Text(
-                                        "sad gay...",
-                                        style: GoogleFonts.qwigley(
-                                          fontWeight: FontWeight.w200,
-                                          fontStyle: FontStyle.italic,
-                                          fontSize: 24,
-                                          color: Colors.blue.shade200,
-                                        ),
-                                      ),
-                                    const SizedBox(width: 20),
-                                    if (value.event == GayPlayerEvent.loading)
-                                      const SizedBox(
-                                        width: 24,
-                                        height: 24,
-                                        child: CircularProgressIndicator(
-                                          color: Colors.white,
-                                          strokeWidth: 3.0,
-                                        ),
-                                      ),
-                                    if (value.event != GayPlayerEvent.loading)
-                                      const MiniMusicVisualizer(
-                                        color: Colors.white,
-                                        width: 4,
-                                        height: 15,
-                                      ),
-                                    const SizedBox(width: 20),
-                                    Expanded(
-                                      child: Text(
-                                        value.song,
-                                        maxLines: 3,
-                                        textAlign: TextAlign.left,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                    ),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.end,
-                                      children: [
-                                        Slider(
-                                          onChanged: (v) {
-                                            value.volume = v;
-                                          },
-                                          value: value.volume,
-                                          activeColor: Colors.white,
-                                          inactiveColor:
-                                              Colors.white.withOpacity(0.2),
-                                        ),
-                                        const SizedBox(width: 20),
-                                        Icon(
-                                          value.volume == 0.0
-                                              ? Icons.volume_off
-                                              : value.volume < 0.6
-                                                  ? Icons.volume_down
-                                                  : Icons.volume_up,
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
-                              )
+                            ? PlayerWidget(player: value)
                             : Container(),
                   ),
                 ],
