@@ -9,6 +9,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:kplayer/kplayer.dart';
+import 'package:mini_music_visualizer/mini_music_visualizer.dart';
 import 'package:provider/provider.dart';
 import 'package:truemanradio/player.dart';
 
@@ -268,7 +269,11 @@ class _MyHomePageState extends State<MyHomePage> {
                                         ),
                                       ),
                                     if (value.event != GayPlayerEvent.loading)
-                                      const Icon(Icons.music_note),
+                                      const MiniMusicVisualizer(
+                                        color: Colors.white,
+                                        width: 4,
+                                        height: 15,
+                                      ),
                                     const SizedBox(width: 20),
                                     Expanded(
                                       child: Text(
