@@ -82,12 +82,23 @@ class _MyHomePageState extends State<MyHomePage> {
                 ).createShader(
                   Rect.fromLTWH(0, 0, bounds.width, bounds.height),
                 ),
-                child: const Text(
-                  "TRUE MAN RADIO",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w900,
-                    fontStyle: FontStyle.italic,
-                  ),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    const Text(
+                      "TRUE MAN RADIO",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w900,
+                        fontStyle: FontStyle.italic,
+                      ),
+                    ),
+                    Text(
+                      "v1.1",
+                      style: GoogleFonts.roboto(
+                        fontSize: 8,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -113,163 +124,186 @@ class _MyHomePageState extends State<MyHomePage> {
                         color: Colors.black.withAlpha(200),
                       ),
                       child: Center(
-                        child: Consumer<GayPlayer>(
-                          builder: (context, value, child) => Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              Text(
-                                "Choose your gay wave:",
-                                style: GoogleFonts.roboto(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.w200,
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextButton(
-                                onPressed: (value.wave == GayWave.gay)
-                                    ? null
-                                    : () {
-                                        value.wave = GayWave.gay;
-                                      },
-                                child: Text(
-                                  "GAY",
-                                  style: GoogleFonts.montserrat(
-                                    fontWeight: FontWeight.w900,
-                                    fontSize: 36,
-                                    color: Colors.blueGrey,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextButton(
-                                onPressed: (value.wave == GayWave.trueGay)
-                                    ? null
-                                    : () {
-                                        value.wave = GayWave.trueGay;
-                                      },
-                                child: Text(
-                                  "TRUE GAY",
-                                  style: GoogleFonts.oswald(
-                                    fontWeight: FontWeight.w900,
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 36,
-                                    color: Colors.purpleAccent,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextButton(
-                                onPressed: (value.wave == GayWave.sadGay)
-                                    ? null
-                                    : () {
-                                        value.wave = GayWave.sadGay;
-                                      },
-                                child: Text(
-                                  "sad gay...",
-                                  style: GoogleFonts.qwigley(
-                                    fontWeight: FontWeight.w200,
-                                    fontStyle: FontStyle.italic,
-                                    fontSize: 36,
-                                    color: Colors.blue.shade200,
-                                  ),
-                                ),
-                              ),
-                              const SizedBox(
-                                height: 10,
-                              ),
-                              TextButton(
-                                onPressed: (value.wave == GayWave.none)
-                                    ? null
-                                    : () {
-                                        value.wave = GayWave.none;
-                                      },
-                                child: Text(
-                                  "None",
+                        child: SingleChildScrollView(
+                          child: Consumer<GayPlayer>(
+                            builder: (context, value, child) => Column(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Text(
+                                  "Choose your gay wave:",
                                   style: GoogleFonts.roboto(
                                     fontSize: 24,
                                     fontWeight: FontWeight.w200,
-                                    color: Colors.blueGrey,
                                   ),
                                 ),
-                              ),
-                            ],
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextButton(
+                                  onPressed: (value.wave == GayWave.gay)
+                                      ? null
+                                      : () {
+                                          value.wave = GayWave.gay;
+                                        },
+                                  child: Text(
+                                    "GAY",
+                                    style: GoogleFonts.montserrat(
+                                      fontWeight: FontWeight.w900,
+                                      fontSize: 36,
+                                      color: Colors.blueGrey,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextButton(
+                                  onPressed: (value.wave == GayWave.trueGay)
+                                      ? null
+                                      : () {
+                                          value.wave = GayWave.trueGay;
+                                        },
+                                  child: Text(
+                                    "TRUE GAY",
+                                    style: GoogleFonts.oswald(
+                                      fontWeight: FontWeight.w900,
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 36,
+                                      color: Colors.purpleAccent,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextButton(
+                                  onPressed: (value.wave == GayWave.sadGay)
+                                      ? null
+                                      : () {
+                                          value.wave = GayWave.sadGay;
+                                        },
+                                  child: Text(
+                                    "sad gay...",
+                                    style: GoogleFonts.qwigley(
+                                      fontWeight: FontWeight.w200,
+                                      fontStyle: FontStyle.italic,
+                                      fontSize: 36,
+                                      color: Colors.blue.shade200,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                TextButton(
+                                  onPressed: (value.wave == GayWave.none)
+                                      ? null
+                                      : () {
+                                          value.wave = GayWave.none;
+                                        },
+                                  child: Text(
+                                    "None",
+                                    style: GoogleFonts.roboto(
+                                      fontSize: 24,
+                                      fontWeight: FontWeight.w200,
+                                      color: Colors.blueGrey,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
                     ),
                   ),
                   Consumer<GayPlayer>(
-                    builder: (context, value, child) => (value.wave !=
-                            GayWave.none)
-                        ? Container(
-                            padding: const EdgeInsets.all(20),
-                            decoration: const BoxDecoration(
-                              color: Colors.black,
-                            ),
-                            width: MediaQuery.of(context).size.width,
-                            child: Row(
-                              children: [
-                                if (value.wave == GayWave.gay)
-                                  Text(
-                                    "GAY",
-                                    style: GoogleFonts.montserrat(
-                                      fontWeight: FontWeight.w900,
-                                      fontSize: 24,
-                                      color: Colors.blueGrey,
-                                    ),
-                                  ),
-                                if (value.wave == GayWave.trueGay)
-                                  Text(
-                                    "TRUE GAY",
-                                    style: GoogleFonts.oswald(
-                                      fontWeight: FontWeight.w900,
-                                      fontStyle: FontStyle.italic,
-                                      fontSize: 24,
-                                      color: Colors.purpleAccent,
-                                    ),
-                                  ),
-                                if (value.wave == GayWave.sadGay)
-                                  Text(
-                                    "sad gay...",
-                                    style: GoogleFonts.qwigley(
-                                      fontWeight: FontWeight.w200,
-                                      fontStyle: FontStyle.italic,
-                                      fontSize: 24,
-                                      color: Colors.blue.shade200,
-                                    ),
-                                  ),
-                                const SizedBox(width: 20),
-                                const Icon(Icons.music_note),
-                                const SizedBox(width: 20),
-                                Text(value.song),
-                                Expanded(
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.end,
-                                    children: [
-                                      Slider(
-                                        onChanged: (v) {
-                                          value.volume = v;
-                                        },
-                                        value: value.volume,
-                                        activeColor: Colors.white,
-                                        inactiveColor:
-                                            Colors.white.withOpacity(0.2),
-                                      ),
-                                      const SizedBox(width: 20),
-                                      const Icon(Icons.volume_up),
-                                    ],
-                                  ),
+                    builder: (context, value, child) =>
+                        (value.wave != GayWave.none)
+                            ? Container(
+                                padding: const EdgeInsets.all(20),
+                                decoration: const BoxDecoration(
+                                  color: Colors.black,
                                 ),
-                              ],
-                            ),
-                          )
-                        : Container(),
+                                width: MediaQuery.of(context).size.width,
+                                child: Row(
+                                  children: [
+                                    if (value.wave == GayWave.gay)
+                                      Text(
+                                        "GAY",
+                                        style: GoogleFonts.montserrat(
+                                          fontWeight: FontWeight.w900,
+                                          fontSize: 24,
+                                          color: Colors.blueGrey,
+                                        ),
+                                      ),
+                                    if (value.wave == GayWave.trueGay)
+                                      Text(
+                                        "TRUE GAY",
+                                        style: GoogleFonts.oswald(
+                                          fontWeight: FontWeight.w900,
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 24,
+                                          color: Colors.purpleAccent,
+                                        ),
+                                      ),
+                                    if (value.wave == GayWave.sadGay)
+                                      Text(
+                                        "sad gay...",
+                                        style: GoogleFonts.qwigley(
+                                          fontWeight: FontWeight.w200,
+                                          fontStyle: FontStyle.italic,
+                                          fontSize: 24,
+                                          color: Colors.blue.shade200,
+                                        ),
+                                      ),
+                                    const SizedBox(width: 20),
+                                    if (value.event == GayPlayerEvent.loading)
+                                      const SizedBox(
+                                        width: 24,
+                                        height: 24,
+                                        child: CircularProgressIndicator(
+                                          color: Colors.white,
+                                          strokeWidth: 3.0,
+                                        ),
+                                      ),
+                                    if (value.event != GayPlayerEvent.loading)
+                                      const Icon(Icons.music_note),
+                                    const SizedBox(width: 20),
+                                    Expanded(
+                                      child: Text(
+                                        value.song,
+                                        maxLines: 3,
+                                        textAlign: TextAlign.left,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.end,
+                                      children: [
+                                        Slider(
+                                          onChanged: (v) {
+                                            value.volume = v;
+                                          },
+                                          value: value.volume,
+                                          activeColor: Colors.white,
+                                          inactiveColor:
+                                              Colors.white.withOpacity(0.2),
+                                        ),
+                                        const SizedBox(width: 20),
+                                        Icon(
+                                          value.volume == 0.0
+                                              ? Icons.volume_off
+                                              : value.volume < 0.6
+                                                  ? Icons.volume_down
+                                                  : Icons.volume_up,
+                                        ),
+                                      ],
+                                    ),
+                                  ],
+                                ),
+                              )
+                            : Container(),
                   ),
                 ],
               ),
