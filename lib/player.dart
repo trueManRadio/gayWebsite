@@ -104,6 +104,8 @@ class GayPlayer extends ChangeNotifier {
   final Map<GayWave, List<String>> _availableTracks = {};
   final List<String> _availableAds = [];
 
+  PlayerController? get player => _impl.lastPlayer;
+
   void playerEventHandler(PlayerEvent event) {
     if (event == PlayerEvent.status &&
         _impl.lastPlayer!.status == PlayerStatus.ended) {
@@ -135,8 +137,10 @@ class GayPlayer extends ChangeNotifier {
         runMusic();
         return;
       }
-    } else if (_event == GayPlayerEvent.loading) {
+    } else if (_event == GayPlayerEvent.loading &&
+        state != GayEventState.running) {
       // First run case
+      state = GayEventState.running;
       runMusic();
       return;
     }
@@ -153,7 +157,17 @@ class GayPlayer extends ChangeNotifier {
     _availableAds.remove(randomAd);
 
     _impl.loadAd(this, randomAd);
-    event = GayPlayerEvent.ad;
+
+    StreamSubscription? s;
+    s = _impl.lastPlayer!.streams.status.listen((pevent) {
+      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
+          event != GayPlayerEvent.ad) {
+        event = GayPlayerEvent.ad;
+        if (s != null) {
+          s.cancel();
+        }
+      }
+    });
 
     _impl.setPlayerCallback(playerEventHandler);
   }
@@ -163,7 +177,17 @@ class GayPlayer extends ChangeNotifier {
     _impl.loadPostAd(
       this,
     );
-    event = GayPlayerEvent.postAd;
+
+    StreamSubscription? s;
+    s = _impl.lastPlayer!.streams.status.listen((pevent) {
+      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
+          event != GayPlayerEvent.postAd) {
+        event = GayPlayerEvent.postAd;
+        if (s != null) {
+          s.cancel();
+        }
+      }
+    });
 
     _impl.setPlayerCallback(playerEventHandler);
   }
@@ -173,7 +197,17 @@ class GayPlayer extends ChangeNotifier {
     _impl.loadPreAd(
       this,
     );
-    event = GayPlayerEvent.preAd;
+
+    StreamSubscription? s;
+    s = _impl.lastPlayer!.streams.status.listen((pevent) {
+      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
+          event != GayPlayerEvent.preAd) {
+        event = GayPlayerEvent.preAd;
+        if (s != null) {
+          s.cancel();
+        }
+      }
+    });
 
     _impl.setPlayerCallback(playerEventHandler);
   }
@@ -192,8 +226,18 @@ class GayPlayer extends ChangeNotifier {
       this,
       randomTrack,
     );
-    song = trackNames[randomTrack]!;
-    event = GayPlayerEvent.song;
+
+    StreamSubscription? s;
+    s = _impl.lastPlayer!.streams.status.listen((pevent) {
+      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
+          event != GayPlayerEvent.song) {
+        event = GayPlayerEvent.song;
+        song = trackNames[randomTrack]!;
+        if (s != null) {
+          s.cancel();
+        }
+      }
+    });
 
     _impl.setPlayerCallback(playerEventHandler);
   }
@@ -216,6 +260,7 @@ class GayPlayer extends ChangeNotifier {
     _addWaveTracksIfNull(GayWave.trueGay);
 
     event = GayPlayerEvent.loading;
+    state = GayEventState.loading;
     playerEventHandler(PlayerEvent.load);
   }
 
