@@ -198,6 +198,12 @@ class GayPlayer extends ChangeNotifier {
     _impl.setPlayerCallback(playerEventHandler);
   }
 
+  void _addWaveTracksIfNull(GayWave w) {
+    if (_availableTracks[w] == null) {
+      _availableTracks[w] = [...waveContents[w]!];
+    }
+  }
+
   void mainThread() {
     if (wave == GayWave.none) {
       return;
@@ -205,9 +211,9 @@ class GayPlayer extends ChangeNotifier {
 
     // Init non-annoying random
     _availableAds.addAll(adContents);
-    _availableTracks[GayWave.gay] = [...waveContents[GayWave.gay]!];
-    _availableTracks[GayWave.trueGay] = [...waveContents[GayWave.trueGay]!];
-    _availableTracks[GayWave.sadGay] = [...waveContents[GayWave.sadGay]!];
+    _addWaveTracksIfNull(GayWave.gay);
+    _addWaveTracksIfNull(GayWave.sadGay);
+    _addWaveTracksIfNull(GayWave.trueGay);
 
     event = GayPlayerEvent.loading;
     playerEventHandler(PlayerEvent.load);
