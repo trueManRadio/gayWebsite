@@ -100,7 +100,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                 child: Image.asset(
                   "assets/gym.jpg",
-                  fit: BoxFit.fill,
+                  fit: BoxFit.cover,
                   width: MediaQuery.of(context).size.width,
                   height: MediaQuery.of(context).size.height,
                 ),
