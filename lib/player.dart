@@ -101,6 +101,8 @@ class GayPlayer extends ChangeNotifier {
   String _currentSong = "Loading...";
   double _volume = 0.7;
   final _GayPlayerImpl _impl = _GayPlayerImpl();
+  final Map<GayWave, List<String>> _availableTracks = {};
+  final List<String> _availableAds = [];
 
   void playerEventHandler(PlayerEvent event) {
     if (event == PlayerEvent.status &&
@@ -142,10 +144,15 @@ class GayPlayer extends ChangeNotifier {
 
   void runAd() {
     event = GayPlayerEvent.loading;
-    _impl.loadAd(
-      this,
-      adContents[Random().nextInt(adContents.length)],
-    );
+
+    // Non-annoying random
+    if (_availableAds.isEmpty) {
+      _availableAds.addAll(adContents);
+    }
+    String randomAd = _availableAds[Random().nextInt(_availableAds.length)];
+    _availableAds.remove(randomAd);
+
+    _impl.loadAd(this, randomAd);
     event = GayPlayerEvent.ad;
 
     _impl.setPlayerCallback(playerEventHandler);
@@ -172,8 +179,13 @@ class GayPlayer extends ChangeNotifier {
   }
 
   void runMusic() {
-    String randomTrack =
-        waveContents[wave]![Random().nextInt(waveContents[wave]!.length)];
+    // Non-annoying random
+    if (_availableTracks[wave]!.isEmpty) {
+      _availableTracks[wave]!.addAll(waveContents[wave]!);
+    }
+    String randomTrack = _availableTracks[wave]![
+        Random().nextInt(_availableTracks[wave]!.length)];
+    _availableTracks[wave]!.remove(randomTrack);
 
     event = GayPlayerEvent.loading;
     _impl.loadMusic(
@@ -190,6 +202,12 @@ class GayPlayer extends ChangeNotifier {
     if (wave == GayWave.none) {
       return;
     }
+
+    // Init non-annoying random
+    _availableAds.addAll(adContents);
+    _availableTracks[GayWave.gay] = [...waveContents[GayWave.gay]!];
+    _availableTracks[GayWave.trueGay] = [...waveContents[GayWave.trueGay]!];
+    _availableTracks[GayWave.sadGay] = [...waveContents[GayWave.sadGay]!];
 
     event = GayPlayerEvent.loading;
     playerEventHandler(PlayerEvent.load);
