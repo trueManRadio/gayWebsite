@@ -50,7 +50,7 @@ class MainPage extends StatelessWidget {
                     ),
                   ),
                   Text(
-                    "v1.1",
+                    "v1.2",
                     style: GoogleFonts.roboto(
                       fontSize: 8,
                     ),
