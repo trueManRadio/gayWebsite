@@ -81,7 +81,8 @@ class GayPlayer extends ChangeNotifier {
 
       if (_event == GayPlayerEvent.song) {
         // Check will we play ad or not
-        if (Random().nextBool()) {
+        // Chance: 20%
+        if (Random().nextInt(100) < 20) {
           runPreAd();
         } else {
           runMusic();
