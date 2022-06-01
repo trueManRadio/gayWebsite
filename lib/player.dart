@@ -4,49 +4,12 @@
  */
 
 import 'dart:async';
-import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
 import 'package:kplayer/kplayer.dart';
 import 'tracklist.dart';
 
-enum GayWave {
-  gay,
-  trueGay,
-  sadGay,
-  none,
-}
-
-enum GayPlayerEvent {
-  loading,
-  song,
-  preAd,
-  ad,
-  postAd,
-}
-
-enum GayEventState {
-  loading,
-  running,
-}
-
-String _baseUrl =
-    "https://raw.githubusercontent.com/trueManRadio/audioStorage/master/";
-Map<GayWave, String> _waveUrl = {
-  GayWave.none: "",
-  GayWave.gay: "gay/",
-  GayWave.sadGay: "sadGay/",
-  GayWave.trueGay: "trueGay/",
-};
-String _adsUrl = "ads/";
-String _preAdSoundName = "preAd.mp3";
-String _postAdSoundName = "postAd.mp3";
-Map<GayWave, String> _waveAdPartsUrl = {
-  GayWave.none: "",
-  GayWave.gay: "gaySounds/",
-  GayWave.sadGay: "sadGaySounds/",
-  GayWave.trueGay: "trueGaySounds/",
-};
+export 'tracklist.dart';
 
 class _GayPlayerImpl {
   PlayerController? lastPlayer;
@@ -59,6 +22,8 @@ class _GayPlayerImpl {
   }
 
   void setupPlayer(String url, GayPlayer p) {
+    print(url);
+
     lastPlayer = Player.network(url, autoPlay: false);
     lastPlayer!.volume = p.volume;
     lastPlayer!.init();
@@ -73,20 +38,20 @@ class _GayPlayerImpl {
 
   void loadAd(GayPlayer p, String name) {
     stopLastPlayer();
-    setupPlayer(_baseUrl + _adsUrl + name, p);
+    setupPlayer(baseUrl + p.tracklist.adsPath + name, p);
   }
 
   void loadPreAd(GayPlayer p) {
-    loadAd(p, _waveAdPartsUrl[p.wave]! + _preAdSoundName);
+    loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + preAdSoundName);
   }
 
   void loadPostAd(GayPlayer p) {
-    loadAd(p, _waveAdPartsUrl[p.wave]! + _postAdSoundName);
+    loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + postAdSoundName);
   }
 
   void loadMusic(GayPlayer p, String name) {
     stopLastPlayer();
-    setupPlayer(_baseUrl + _waveUrl[p.wave]! + name, p);
+    setupPlayer(baseUrl + p.tracklist.wavePath[p.wave]! + name, p);
   }
 
   void setPlayerCallback(Function(PlayerEvent) handler) {
@@ -101,8 +66,9 @@ class GayPlayer extends ChangeNotifier {
   String _currentSong = "Loading...";
   double _volume = 0.7;
   final _GayPlayerImpl _impl = _GayPlayerImpl();
-  final Map<GayWave, List<String>> _availableTracks = {};
+  final Map<GayWave, List<GayTrack>> _availableTracks = {};
   final List<String> _availableAds = [];
+  GayTracklist tracklist;
 
   PlayerController? get player => _impl.lastPlayer;
 
@@ -151,7 +117,7 @@ class GayPlayer extends ChangeNotifier {
 
     // Non-annoying random
     if (_availableAds.isEmpty) {
-      _availableAds.addAll(adContents);
+      _availableAds.addAll(tracklist.ads);
     }
     String randomAd = _availableAds[Random().nextInt(_availableAds.length)];
     _availableAds.remove(randomAd);
@@ -215,16 +181,16 @@ class GayPlayer extends ChangeNotifier {
   void runMusic() {
     // Non-annoying random
     if (_availableTracks[wave]!.isEmpty) {
-      _availableTracks[wave]!.addAll(waveContents[wave]!);
+      _availableTracks[wave]!.addAll(tracklist.tracksByWaves[wave]!);
     }
-    String randomTrack = _availableTracks[wave]![
+    GayTrack randomTrack = _availableTracks[wave]![
         Random().nextInt(_availableTracks[wave]!.length)];
     _availableTracks[wave]!.remove(randomTrack);
 
     event = GayPlayerEvent.loading;
     _impl.loadMusic(
       this,
-      randomTrack,
+      randomTrack.filename,
     );
 
     StreamSubscription? s;
@@ -232,7 +198,7 @@ class GayPlayer extends ChangeNotifier {
       if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
           event != GayPlayerEvent.song) {
         event = GayPlayerEvent.song;
-        song = trackNames[randomTrack]!;
+        song = randomTrack.name;
         if (s != null) {
           s.cancel();
         }
@@ -244,7 +210,7 @@ class GayPlayer extends ChangeNotifier {
 
   void _addWaveTracksIfNull(GayWave w) {
     if (_availableTracks[w] == null) {
-      _availableTracks[w] = [...waveContents[w]!];
+      _availableTracks[w] = [...tracklist.tracksByWaves[w]!];
     }
   }
 
@@ -254,7 +220,9 @@ class GayPlayer extends ChangeNotifier {
     }
 
     // Init non-annoying random
-    _availableAds.addAll(adContents);
+    if (_availableAds != null) {
+      _availableAds.addAll(tracklist.ads);
+    }
     _addWaveTracksIfNull(GayWave.gay);
     _addWaveTracksIfNull(GayWave.sadGay);
     _addWaveTracksIfNull(GayWave.trueGay);
@@ -310,6 +278,8 @@ class GayPlayer extends ChangeNotifier {
     _impl.setVolume(this);
     notifyListeners();
   }
+
+  GayPlayer({required this.tracklist});
 
   double get volume => _volume;
   GayWave get wave => _currentWave;
