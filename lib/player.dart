@@ -22,8 +22,6 @@ class _GayPlayerImpl {
   }
 
   void setupPlayer(String url, GayPlayer p) {
-    print(url);
-
     lastPlayer = Player.network(url, autoPlay: false);
     lastPlayer!.volume = p.volume;
     lastPlayer!.init();
