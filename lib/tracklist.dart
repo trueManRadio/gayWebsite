@@ -14,6 +14,11 @@ void _logAndThrow(String text) {
   throw (text);
 }
 
+void _warning(String text) {
+  // ignore: avoid_print
+  print("WARNING: $text");
+}
+
 GayWave _waveFromString(String wave) {
   for (var i in GayWave.values) {
     if (i.toString() == wave) {
@@ -21,6 +26,7 @@ GayWave _waveFromString(String wave) {
     }
   }
 
+  _warning("$wave NOT FOUND");
   return GayWave.gay;
 }
 
@@ -45,11 +51,13 @@ class GayTrack {
       name = json["name"];
     } else {
       name = "Unknown name";
+      _warning("${json["filename"]} haven't got display name");
     }
     if (json["wave"] != null) {
       wave = _waveFromString(json["wave"]);
     } else {
       wave = GayWave.gay;
+      _warning("${json["filename"]} haven't got wave");
     }
   }
 }
@@ -99,7 +107,7 @@ class GayTracklist {
     }
     for (var i
         in Map<String, dynamic>.from(json["contents_path"]!["ads"]!).entries) {
-      if (i.value == 'root') continue;
+      if (i.key == 'root') continue;
       adWaveSoundsPath[_waveFromString(i.key.replaceAll("_sounds", ""))] =
           i.value + "/";
     }
