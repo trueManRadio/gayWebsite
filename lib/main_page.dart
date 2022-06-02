@@ -8,23 +8,39 @@ import 'package:truemanradio/player.dart';
 import 'package:truemanradio/player_widget.dart';
 import 'package:video_player/video_player.dart';
 
-class MainPage extends StatelessWidget {
+class MainPage extends StatefulWidget {
   const MainPage({Key? key}) : super(key: key);
 
-  Future<VideoPlayerController> _getVideoController(GayWave w) async {
-    final c = VideoPlayerController.asset(
-      "assets/bg_${w.toString()}.mp4",
-      videoPlayerOptions: VideoPlayerOptions(
-        allowBackgroundPlayback: true,
-      ),
-    );
+  @override
+  State<MainPage> createState() => _MainPageState();
+}
 
-    await c.initialize();
-    await c.setLooping(true);
-    await c.setVolume(0);
-    await c.play();
+class _MainPageState extends State<MainPage> {
+  final Map<GayWave, VideoPlayerController> _controllers = {};
 
-    return c;
+  void _initControllers() async {
+    for (var c in _controllers.values) {
+      await c.initialize();
+      await c.setLooping(true);
+      await c.setVolume(0);
+      await c.play();
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+
+    for (var i in [...GayWave.values]..remove(GayWave.none)) {
+      _controllers[i] = VideoPlayerController.asset(
+        "assets/bg_${i.toString()}.mp4",
+        videoPlayerOptions: VideoPlayerOptions(
+          allowBackgroundPlayback: true,
+        ),
+      );
+    }
+
+    _initControllers();
   }
 
   final bool _visible = true;
@@ -87,43 +103,29 @@ class MainPage extends StatelessWidget {
               ImageFiltered(
                 imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                 child: AnimatedSwitcher(
-                    duration: const Duration(seconds: 1),
-                    child: value.wave == GayWave.none
-                        ? Image.asset(
-                            "assets/gym.jpg",
+                  duration: const Duration(seconds: 1),
+                  child: value.wave == GayWave.none
+                      ? Image.asset(
+                          "assets/gym.jpg",
+                          fit: BoxFit.cover,
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                        )
+                      : SizedBox.expand(
+                          key: UniqueKey(),
+                          child: FittedBox(
                             fit: BoxFit.cover,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                          )
-                        : FutureBuilder<VideoPlayerController>(
-                            future: _getVideoController(value.wave),
-                            builder: (context, snapshot) {
-                              if (snapshot.connectionState ==
-                                  ConnectionState.done) {
-                                return SizedBox.expand(
-                                  key: UniqueKey(),
-                                  child: FittedBox(
-                                    fit: BoxFit.cover,
-                                    child: SizedBox(
-                                      width: snapshot.data!.value.size.width,
-                                      height: snapshot.data!.value.size.height,
-                                      child: VideoPlayer(snapshot.data!),
-                                    ),
-                                  ),
-                                );
-                              } else {
-                                return const Center(
-                                  child: SizedBox(
-                                    height: 250,
-                                    width: 250,
-                                    child: CircularProgressIndicator(
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                );
-                              }
-                            },
-                          )),
+                            child: SizedBox(
+                              width: _controllers[value.wave]!.value.size.width,
+                              height:
+                                  _controllers[value.wave]!.value.size.height,
+                              child: VideoPlayer(
+                                _controllers[value.wave]!..play(),
+                              ),
+                            ),
+                          ),
+                        ),
+                ),
               ),
               Column(
                 children: [
