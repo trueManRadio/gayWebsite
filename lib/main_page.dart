@@ -1,5 +1,6 @@
 import 'dart:ui';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -85,7 +86,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   Text(
-                    "v2.0",
+                    "v2.0${kDebugMode ? "-debug" : ""}",
                     style: GoogleFonts.roboto(
                       fontSize: 8,
                     ),
