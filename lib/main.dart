@@ -5,7 +5,6 @@
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:kplayer/kplayer.dart';
 import 'package:provider/provider.dart';
 import 'package:truemanradio/main_page.dart';
 import 'package:truemanradio/player.dart';
@@ -14,7 +13,6 @@ import 'package:truemanradio/player.dart';
 // also I was too lazy to remove app template parts.....
 
 void main() {
-  Player.boot();
   runApp(const MyApp());
 }
 

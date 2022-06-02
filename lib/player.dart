@@ -6,54 +6,59 @@
 import 'dart:async';
 import 'dart:math';
 import 'package:flutter/material.dart';
-import 'package:kplayer/kplayer.dart';
+import 'package:audioplayers/audioplayers.dart';
 import 'tracklist.dart';
+import 'player_types.dart';
 
 export 'tracklist.dart';
+export 'player_types.dart';
 
 class _GayPlayerImpl {
-  PlayerController? lastPlayer;
+  AudioPlayer? audioPlayer;
 
-  void stopLastPlayer() {
-    if (lastPlayer != null) {
-      lastPlayer!.dispose();
+  Future<void> setupPlayer(String url, GayPlayer p) async {
+    if (audioPlayer!.state != PlayerState.stopped) {
+      await audioPlayer!.stop();
     }
-    lastPlayer = null;
+
+    await audioPlayer!.play(
+      UrlSource(url),
+      volume: p.volume,
+      mode: PlayerMode.mediaPlayer,
+    );
   }
 
-  void setupPlayer(String url, GayPlayer p) {
-    lastPlayer = Player.network(url, autoPlay: false);
-    lastPlayer!.volume = p.volume;
-    lastPlayer!.init();
-    lastPlayer!.play();
-  }
-
-  void setVolume(GayPlayer p) {
-    if (lastPlayer != null) {
-      lastPlayer!.volume = p.volume;
+  Future<void> setVolume(GayPlayer p) async {
+    if (audioPlayer != null) {
+      await audioPlayer!.setVolume(p.volume);
     }
   }
 
-  void loadAd(GayPlayer p, String name) {
-    stopLastPlayer();
-    setupPlayer(baseUrl + p.tracklist.adsPath + name, p);
+  Future<void> loadAd(GayPlayer p, String name) {
+    return setupPlayer(baseUrl + p.tracklist.adsPath + name, p);
   }
 
-  void loadPreAd(GayPlayer p) {
-    loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + preAdSoundName);
+  Future<void> loadPreAd(GayPlayer p) {
+    return loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + preAdSoundName);
   }
 
-  void loadPostAd(GayPlayer p) {
-    loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + postAdSoundName);
+  Future<void> loadPostAd(GayPlayer p) {
+    return loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + postAdSoundName);
   }
 
-  void loadMusic(GayPlayer p, String name) {
-    stopLastPlayer();
-    setupPlayer(baseUrl + p.tracklist.wavePath[p.wave]! + name, p);
+  Future<void> loadMusic(GayPlayer p, String name) {
+    return setupPlayer(baseUrl + p.tracklist.wavePath[p.wave]! + name, p);
   }
 
-  void setPlayerCallback(Function(PlayerEvent) handler) {
-    lastPlayer!.callback = handler;
+  void setPlayerCallback(Function(PlayerState) handler) {
+    audioPlayer!.onPlayerStateChanged.listen(handler);
+    audioPlayer!.onPlayerComplete.listen((event) {
+      handler(PlayerState.stopped);
+    });
+  }
+
+  void initPlayer() {
+    audioPlayer = AudioPlayer();
   }
 }
 
@@ -68,15 +73,19 @@ class GayPlayer extends ChangeNotifier {
   final List<String> _availableAds = [];
   GayTracklist tracklist;
 
-  PlayerController? get player => _impl.lastPlayer;
+  AudioPlayer? get player => _impl.audioPlayer;
 
-  void playerEventHandler(PlayerEvent event) {
-    if (event == PlayerEvent.status &&
-        _impl.lastPlayer!.status == PlayerStatus.ended) {
-      if (wave == GayWave.none) {
-        return;
-      }
+  void playerEventHandler(PlayerState pstate) {
+    if (wave == GayWave.none) {
+      return;
+    }
 
+    if (pstate == PlayerState.paused) {
+      player!.resume();
+      return;
+    }
+
+    if (pstate == PlayerState.stopped) {
       if (_event == GayPlayerEvent.song) {
         // Check will we play ad or not
         // Chance: 20%
@@ -124,9 +133,8 @@ class GayPlayer extends ChangeNotifier {
     _impl.loadAd(this, randomAd);
 
     StreamSubscription? s;
-    s = _impl.lastPlayer!.streams.status.listen((pevent) {
-      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
-          event != GayPlayerEvent.ad) {
+    s = player!.onDurationChanged.listen((dur) {
+      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.ad) {
         event = GayPlayerEvent.ad;
         if (s != null) {
           s.cancel();
@@ -144,9 +152,8 @@ class GayPlayer extends ChangeNotifier {
     );
 
     StreamSubscription? s;
-    s = _impl.lastPlayer!.streams.status.listen((pevent) {
-      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
-          event != GayPlayerEvent.postAd) {
+    s = player!.onDurationChanged.listen((dur) {
+      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.postAd) {
         event = GayPlayerEvent.postAd;
         if (s != null) {
           s.cancel();
@@ -164,9 +171,8 @@ class GayPlayer extends ChangeNotifier {
     );
 
     StreamSubscription? s;
-    s = _impl.lastPlayer!.streams.status.listen((pevent) {
-      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
-          event != GayPlayerEvent.preAd) {
+    s = player!.onDurationChanged.listen((dur) {
+      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.preAd) {
         event = GayPlayerEvent.preAd;
         if (s != null) {
           s.cancel();
@@ -193,9 +199,8 @@ class GayPlayer extends ChangeNotifier {
     );
 
     StreamSubscription? s;
-    s = _impl.lastPlayer!.streams.status.listen((pevent) {
-      if (_impl.lastPlayer!.duration.inMilliseconds > 10 &&
-          event != GayPlayerEvent.song) {
+    s = player!.onDurationChanged.listen((dur) {
+      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.song) {
         event = GayPlayerEvent.song;
         song = randomTrack.name;
         if (s != null) {
@@ -219,7 +224,7 @@ class GayPlayer extends ChangeNotifier {
     }
 
     // Init non-annoying random
-    if (_availableAds != null) {
+    if (_availableAds.isEmpty) {
       _availableAds.addAll(tracklist.ads);
     }
     _addWaveTracksIfNull(GayWave.gay);
@@ -228,15 +233,18 @@ class GayPlayer extends ChangeNotifier {
 
     event = GayPlayerEvent.loading;
     state = GayEventState.loading;
-    playerEventHandler(PlayerEvent.load);
+    playerEventHandler(PlayerState.completed);
   }
 
   set wave(GayWave w) {
     _currentWave = w;
     notifyListeners();
 
-    _impl.stopLastPlayer();
-    Future.sync(() => mainThread());
+    player!.stop().then(
+          (_) => Future.sync(
+            () => mainThread(),
+          ),
+        );
   }
 
   set event(GayPlayerEvent w) {
@@ -278,7 +286,9 @@ class GayPlayer extends ChangeNotifier {
     notifyListeners();
   }
 
-  GayPlayer({required this.tracklist});
+  GayPlayer({required this.tracklist}) {
+    _impl.initPlayer();
+  }
 
   double get volume => _volume;
   GayWave get wave => _currentWave;
