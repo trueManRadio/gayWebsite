@@ -5,7 +5,7 @@
 
 import 'dart:async';
 import 'dart:math';
-import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart';
 import 'package:audioplayers/audioplayers.dart';
 import 'tracklist.dart';
 import 'player_types.dart';
@@ -72,6 +72,7 @@ class GayPlayer extends ChangeNotifier {
   final Map<GayWave, List<GayTrack>> _availableTracks = {};
   final List<String> _availableAds = [];
   GayTracklist tracklist;
+  GayTrack? currentTrack;
 
   AudioPlayer? get player => _impl.audioPlayer;
 
@@ -201,8 +202,12 @@ class GayPlayer extends ChangeNotifier {
     StreamSubscription? s;
     s = player!.onDurationChanged.listen((dur) {
       if (dur.inMilliseconds > 10 && event != GayPlayerEvent.song) {
+        currentTrack = GayTrack(
+          filename: randomTrack.filename,
+          name: randomTrack.name,
+          wave: randomTrack.wave,
+        );
         event = GayPlayerEvent.song;
-        song = randomTrack.name;
         if (s != null) {
           s.cancel();
         }
@@ -264,7 +269,16 @@ class GayPlayer extends ChangeNotifier {
         _currentSong = "Loading...";
         break;
       case GayPlayerEvent.song:
-        // We do not want to change song name if it's already set
+        if (currentTrack != null) {
+          if (kDebugMode) {
+            _currentSong =
+                "${currentTrack!.wave.toString()} | ${currentTrack!.name} (${currentTrack!.filename})";
+          } else {
+            _currentSong = currentTrack!.name;
+          }
+        } else {
+          _currentSong = "Error (TRACK_INFO_WAS_NOT_PROVIDED)";
+        }
         break;
     }
     notifyListeners();
