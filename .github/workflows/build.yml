@@ -1,0 +1,45 @@
+name: Manual workflow
+
+on:
+  push:
+    branches: ["master"]
+
+jobs:
+  clone-compiled-code:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - run: git clone 
+    
+  build-project:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Setup flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: 'master'
+      
+      - name: Run pub get
+        run: flutter pub get
+      
+      - name: Build for web
+        run: flutter build web --web-renderer canvaskit
+      
+      - name: Pushes to another repository
+        uses: cpina/github-action-push-to-another-repository@main
+        env:
+          API_TOKEN_GITHUB: ${{ secrets.API_TOKEN_GITHUB }}
+        with:
+          source-directory: 'build/web'
+          destination-github-username: 'trueManRadio'
+          destination-repository-name: 'truemanradio.github.io'
+          user-name: 'github-actions[bot]'
+          user-email: 'github-actions[bot]@users.noreply.github.com'
+          commit-message: '[Actions] Rebuild website from ORIGIN_COMMIT'
+          target-branch: master
+      
+  
