@@ -84,13 +84,15 @@ class _MyHomePageState extends State<MyHomePage> {
                             padding: EdgeInsets.symmetric(
                               horizontal: MediaQuery.of(context).size.width / 4,
                             ),
-                            child: Text(
-                              snapshot.error.toString(),
-                              style: GoogleFonts.robotoMono(
-                                color: Colors.grey,
+                            child: SingleChildScrollView(
+                              child: Text(
+                                snapshot.error.toString(),
+                                style: GoogleFonts.robotoMono(
+                                  color: Colors.grey,
+                                ),
+                                maxLines: 9999,
+                                overflow: TextOverflow.ellipsis,
                               ),
-                              maxLines: 9999,
-                              overflow: TextOverflow.ellipsis,
                             ),
                           ),
                         ),
