@@ -1,3 +1,5 @@
+// ignore: avoid_web_libraries_in_flutter
+import 'dart:js' as js;
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
@@ -51,47 +53,72 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.black,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
+        title: Stack(
+          clipBehavior: Clip.antiAlias,
           children: [
-            SvgPicture.asset(
-              "assets/icon.svg",
-              semanticsLabel: 'Logo',
-              width: MediaQuery.of(context).size.height / 32,
-              height: MediaQuery.of(context).size.height / 32,
-            ),
-            const SizedBox(
-              width: 10,
-            ),
-            ShaderMask(
-              blendMode: BlendMode.srcIn,
-              shaderCallback: (bounds) => LinearGradient(
-                colors: [
-                  Colors.white,
-                  Colors.white.withOpacity(0.5),
-                ],
-                end: Alignment.bottomLeft,
-                begin: Alignment.topRight,
-              ).createShader(
-                Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+            Align(
+              alignment: Alignment.centerLeft,
+              child: IconButton(
+                icon: const Icon(
+                  Icons.telegram,
+                  color: Colors.grey,
+                ),
+                onPressed: () {
+                  js.context.callMethod(
+                    "open",
+                    ["https://t.me/truemanradio"],
+                  );
+                },
               ),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.end,
-                children: [
-                  const Text(
-                    "TRUE MAN RADIO",
-                    style: TextStyle(
-                      fontWeight: FontWeight.w900,
-                      fontStyle: FontStyle.italic,
+            ),
+            Positioned.fill(
+              child: Align(
+                alignment: Alignment.center,
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    SvgPicture.asset(
+                      "assets/icon.svg",
+                      semanticsLabel: 'Logo',
+                      width: MediaQuery.of(context).size.height / 32,
+                      height: MediaQuery.of(context).size.height / 32,
                     ),
-                  ),
-                  Text(
-                    "v2.0${kDebugMode ? "-debug" : ""}",
-                    style: GoogleFonts.roboto(
-                      fontSize: 8,
+                    const SizedBox(
+                      width: 10,
                     ),
-                  ),
-                ],
+                    ShaderMask(
+                      blendMode: BlendMode.srcIn,
+                      shaderCallback: (bounds) => LinearGradient(
+                        colors: [
+                          Colors.white,
+                          Colors.white.withOpacity(0.5),
+                        ],
+                        end: Alignment.bottomLeft,
+                        begin: Alignment.topRight,
+                      ).createShader(
+                        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.end,
+                        children: [
+                          const Text(
+                            "TRUE MAN RADIO",
+                            style: TextStyle(
+                              fontWeight: FontWeight.w900,
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                          Text(
+                            "v2.0${kDebugMode ? "-debug" : ""}",
+                            style: GoogleFonts.roboto(
+                              fontSize: 8,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ],
