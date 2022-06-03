@@ -71,6 +71,7 @@ flutter:
     - assets/bg_GayWave.gay.mp4
     - assets/bg_GayWave.sadGay.mp4
     - assets/bg_GayWave.trueGay.mp4
+    - assets/tracklist.json
 
   # To add assets to your application, add an assets section, like this:
   # assets:

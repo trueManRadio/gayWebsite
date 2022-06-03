@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import 'player.dart';
 
+import 'package:flutter/services.dart' show rootBundle;
+
 String baseUrl =
     "https://raw.githubusercontent.com/trueManRadio/audioStorage/master/";
 String preAdSoundName = "preAd.mp3";
@@ -84,25 +86,9 @@ class GayTracklist {
   }
 
   Future<void> network() async {
-    Response r = await Dio().get(
-      "${baseUrl}tracklist.json",
-      options: Options(
-        headers: {
-          'Content-Type': 'application/json; charset=utf-8',
-        },
-      ),
-    );
+    String data = await rootBundle.loadString('tracklist.json');
 
-    if (r.statusCode != 200) {
-      _logAndThrow("Failed to load tracklist (${r.statusCode.toString()})");
-    }
-
-    if (r.data.runtimeType != String) {
-      json = r.data;
-    } else {
-      json = jsonDecode(r.data);
-    }
-
+    json = jsonDecode(data);
     if (json.isEmpty) {
       _logAndThrow("Failed to parse tracklist");
     }
