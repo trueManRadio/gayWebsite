@@ -86,7 +86,7 @@ class GayTracklist {
   }
 
   Future<void> network() async {
-    String data = await rootBundle.loadString('tracklist.json');
+    String data = await rootBundle.loadString('assets/tracklist.json');
 
     json = jsonDecode(data);
     if (json.isEmpty) {
