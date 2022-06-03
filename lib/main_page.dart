@@ -98,87 +98,95 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
       body: SizedBox.expand(
-        child: Consumer<GayPlayer>(
-          builder: (context, value, child) {
-            if (value.event == GayPlayerEvent.error &&
-                value.state == GayEventState.loading) {
-              WidgetsBinding.instance.addPostFrameCallback(
-                (timeStamp) {
-                  showDialog(
-                    context: context,
-                    builder: (context) => Dialog(
-                      child: Padding(
-                        padding: const EdgeInsets.all(20),
-                        child: Column(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            const Text(
-                              "Error while loading track",
-                              style: TextStyle(
-                                fontSize: 24,
-                              ),
-                            ),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Text("Error text"),
-                            Text(value.errorText,
-                                style: GoogleFonts.robotoMono()),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Text("Debug info"),
-                            Text("State: ${value.state.toString()}"),
-                            Text("Event: ${value.event.toString()}"),
-                            Text("Song name: ${value.song}"),
-                            Text("mp3: ${value.mp3}"),
-                            Text("Wave: ${value.wave}"),
-                            Text("Volume: ${value.volume.toStringAsFixed(2)}"),
-                            const SizedBox(
-                              height: 10,
-                            ),
-                            const Text(
-                                "Please reload page to continue listening"),
-                          ],
-                        ),
-                      ),
-                    ),
-                  );
-                },
-              );
-            }
-
-            return Stack(
-              children: [
-                ImageFiltered(
-                  imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                  child: AnimatedSwitcher(
-                    duration: const Duration(seconds: 1),
-                    child: value.wave == GayWave.none
-                        ? Image.asset(
-                            "assets/gym.jpg",
+        child: Stack(
+          children: [
+            AnimatedBuilder(
+              animation: waveNotifier,
+              builder: (context, _) => ImageFiltered(
+                imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                child: AnimatedSwitcher(
+                  duration: const Duration(seconds: 1),
+                  child: waveNotifier.value == GayWave.none
+                      ? Image.asset(
+                          "assets/gym.jpg",
+                          fit: BoxFit.cover,
+                          width: MediaQuery.of(context).size.width,
+                          height: MediaQuery.of(context).size.height,
+                        )
+                      : SizedBox.expand(
+                          key: UniqueKey(),
+                          child: FittedBox(
                             fit: BoxFit.cover,
-                            width: MediaQuery.of(context).size.width,
-                            height: MediaQuery.of(context).size.height,
-                          )
-                        : SizedBox.expand(
-                            key: UniqueKey(),
-                            child: FittedBox(
-                              fit: BoxFit.cover,
-                              child: SizedBox(
-                                width:
-                                    _controllers[value.wave]!.value.size.width,
-                                height:
-                                    _controllers[value.wave]!.value.size.height,
-                                child: VideoPlayer(
-                                  _controllers[value.wave]!..play(),
-                                ),
+                            child: SizedBox(
+                              width: _controllers[waveNotifier.value]!
+                                  .value
+                                  .size
+                                  .width,
+                              height: _controllers[waveNotifier.value]!
+                                  .value
+                                  .size
+                                  .height,
+                              child: VideoPlayer(
+                                _controllers[waveNotifier.value]!..play(),
                               ),
                             ),
                           ),
-                  ),
+                        ),
                 ),
-                Column(
+              ),
+            ),
+            Consumer<GayPlayer>(
+              builder: (context, value, child) {
+                if (value.event == GayPlayerEvent.error &&
+                    value.state == GayEventState.loading) {
+                  WidgetsBinding.instance.addPostFrameCallback(
+                    (timeStamp) {
+                      showDialog(
+                        context: context,
+                        builder: (context) => Dialog(
+                          child: Padding(
+                            padding: const EdgeInsets.all(20),
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                const Text(
+                                  "Error while loading track",
+                                  style: TextStyle(
+                                    fontSize: 24,
+                                  ),
+                                ),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                const Text("Error text"),
+                                Text(value.errorText,
+                                    style: GoogleFonts.robotoMono()),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                const Text("Debug info"),
+                                Text("State: ${value.state.toString()}"),
+                                Text("Event: ${value.event.toString()}"),
+                                Text("Song name: ${value.song}"),
+                                Text("mp3: ${value.mp3}"),
+                                Text("Wave: ${value.wave}"),
+                                Text(
+                                    "Volume: ${value.volume.toStringAsFixed(2)}"),
+                                const SizedBox(
+                                  height: 10,
+                                ),
+                                const Text(
+                                    "Please reload page to continue listening"),
+                              ],
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  );
+                }
+
+                return Column(
                   children: [
                     Expanded(
                       child: (_visible)
@@ -288,10 +296,10 @@ class _MainPageState extends State<MainPage> {
                               : Container(),
                     ),
                   ],
-                ),
-              ],
-            );
-          },
+                );
+              },
+            ),
+          ],
         ),
       ),
     );

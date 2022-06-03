@@ -267,6 +267,7 @@ class GayPlayer extends ChangeNotifier {
 
   set wave(GayWave w) {
     _currentWave = w;
+    waveNotifier.value = w;
     notifyListeners();
 
     player!.stop().then(
@@ -334,3 +335,14 @@ class GayPlayer extends ChangeNotifier {
   String get song => _currentSong;
   GayEventState get state => _eventState;
 }
+
+class GayWaveNotifier extends ChangeNotifier {
+  GayWave _wave = GayWave.none;
+  GayWave get value => _wave;
+  set value(GayWave w) {
+    _wave = w;
+    notifyListeners();
+  }
+}
+
+GayWaveNotifier waveNotifier = GayWaveNotifier();
