@@ -2,15 +2,17 @@
 
 Dungeon master's gay website with radio
 
-## Getting Started
+## Notes
 
-This project is a starting point for a Flutter application.
+To get best performance, please compile app with these arguments:
+```bash
+# Force Skia + CanvasKit rendering.
+flutter build web --dart-define=FLUTTER_WEB_USE_SKIA=true --release --web-renderer canvaskit
+```
 
-A few resources to get you started if this is your first Flutter project:
+### Some numbers
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+Testing device: Snapdragon 625, Chrome 101.0.4951.61, Android 12.1
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+* HTML renderer: 15-20FPS, very huge input lag
+* CanvasKit renderer: 30-35FPS, input lag is very low
