@@ -77,6 +77,7 @@ class GayPlayer extends ChangeNotifier {
   GayTrack? currentTrack;
   String errorText = "";
   String mp3 = "";
+  final Map<GayPlayerEvent, int> _eventKeys = {};
 
   AudioPlayer? get player => _impl.audioPlayer;
 
@@ -128,13 +129,28 @@ class GayPlayer extends ChangeNotifier {
     } catch (e) {
       player!.dispose().then(
         (value) {
-          _event = GayPlayerEvent.error;
           _eventState = GayEventState.loading;
-          song = "Failed to load track";
           errorText = e.toString();
+          event = GayPlayerEvent.error;
         },
       );
     }
+  }
+
+  void _addPostLoadingAction(GayPlayerEvent ev) {
+    int thisSubKey = Random().nextInt(10000);
+
+    StreamSubscription? s;
+    _eventKeys[ev] = thisSubKey;
+    s = player!.onDurationChanged.listen((dur) {
+      if ((_eventKeys[event] ?? thisSubKey) == thisSubKey &&
+          dur.inMilliseconds > 10 &&
+          event != ev &&
+          event != GayPlayerEvent.error) {
+        event = ev;
+        if (s != null) s.cancel();
+      }
+    });
   }
 
   void runAd() {
@@ -148,20 +164,7 @@ class GayPlayer extends ChangeNotifier {
     _availableAds.remove(randomAd);
 
     _impl.loadAd(this, randomAd);
-
-    StreamSubscription? s;
-    s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 &&
-          event != GayPlayerEvent.ad &&
-          event != GayPlayerEvent.error) {
-        event = GayPlayerEvent.ad;
-        if (s != null) {
-          s.cancel();
-        }
-      }
-    });
-
-    _impl.setPlayerCallback(playerEventHandler);
+    _addPostLoadingAction(GayPlayerEvent.ad);
   }
 
   void runPostAd() {
@@ -169,20 +172,7 @@ class GayPlayer extends ChangeNotifier {
     _impl.loadPostAd(
       this,
     );
-
-    StreamSubscription? s;
-    s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 &&
-          event != GayPlayerEvent.postAd &&
-          event != GayPlayerEvent.error) {
-        event = GayPlayerEvent.postAd;
-        if (s != null) {
-          s.cancel();
-        }
-      }
-    });
-
-    _impl.setPlayerCallback(playerEventHandler);
+    _addPostLoadingAction(GayPlayerEvent.postAd);
   }
 
   void runPreAd() {
@@ -190,20 +180,7 @@ class GayPlayer extends ChangeNotifier {
     _impl.loadPreAd(
       this,
     );
-
-    StreamSubscription? s;
-    s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 &&
-          event != GayPlayerEvent.preAd &&
-          event != GayPlayerEvent.error) {
-        event = GayPlayerEvent.preAd;
-        if (s != null) {
-          s.cancel();
-        }
-      }
-    });
-
-    _impl.setPlayerCallback(playerEventHandler);
+    _addPostLoadingAction(GayPlayerEvent.preAd);
   }
 
   void runMusic() {
@@ -213,32 +190,23 @@ class GayPlayer extends ChangeNotifier {
     }
     GayTrack randomTrack = _availableTracks[wave]![
         Random().nextInt(_availableTracks[wave]!.length)];
+
+    currentTrack = GayTrack(
+      filename: randomTrack.filename,
+      name: randomTrack.name,
+      wave: randomTrack.wave,
+    );
+
     _availableTracks[wave]!.remove(randomTrack);
 
     event = GayPlayerEvent.loading;
+
     _impl.loadMusic(
       this,
       randomTrack.filename,
     );
 
-    StreamSubscription? s;
-    s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 &&
-          event != GayPlayerEvent.song &&
-          event != GayPlayerEvent.error) {
-        currentTrack = GayTrack(
-          filename: randomTrack.filename,
-          name: randomTrack.name,
-          wave: randomTrack.wave,
-        );
-        event = GayPlayerEvent.song;
-        if (s != null) {
-          s.cancel();
-        }
-      }
-    });
-
-    _impl.setPlayerCallback(playerEventHandler);
+    _addPostLoadingAction(GayPlayerEvent.song);
   }
 
   void _addWaveTracksIfNull(GayWave w) {
@@ -263,6 +231,22 @@ class GayPlayer extends ChangeNotifier {
     event = GayPlayerEvent.loading;
     state = GayEventState.loading;
     playerEventHandler(PlayerState.completed);
+  }
+
+  String getPlayerText() {
+    if (event != GayPlayerEvent.song) {
+      if (kDebugMode) {
+        return "${wave.toString()}, ${state.toString()} | $song";
+      } else {
+        return song;
+      }
+    }
+
+    if (kDebugMode) {
+      return "${currentTrack!.wave.toString()} | ${currentTrack!.name} (${currentTrack!.filename})";
+    } else {
+      return currentTrack!.name;
+    }
   }
 
   set wave(GayWave w) {
@@ -291,19 +275,11 @@ class GayPlayer extends ChangeNotifier {
         _currentSong = "Music will continue soon";
         break;
       case GayPlayerEvent.loading:
+      case GayPlayerEvent.song:
         _currentSong = "Loading...";
         break;
-      case GayPlayerEvent.song:
-        if (currentTrack != null) {
-          if (kDebugMode) {
-            _currentSong =
-                "${currentTrack!.wave.toString()} | ${currentTrack!.name} (${currentTrack!.filename})";
-          } else {
-            _currentSong = currentTrack!.name;
-          }
-        } else {
-          _currentSong = "Error (TRACK_INFO_WAS_NOT_PROVIDED)";
-        }
+      case GayPlayerEvent.error:
+        _currentSong = "Failed to load track";
         break;
     }
     notifyListeners();
@@ -327,6 +303,7 @@ class GayPlayer extends ChangeNotifier {
 
   GayPlayer({required this.tracklist}) {
     _impl.initPlayer();
+    _impl.setPlayerCallback(playerEventHandler);
   }
 
   double get volume => _volume;

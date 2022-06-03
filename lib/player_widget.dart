@@ -88,7 +88,7 @@ class PlayerWidget extends StatelessWidget {
               const SizedBox(width: 20),
               Expanded(
                 child: Text(
-                  player.song,
+                  player.getPlayerText(),
                   maxLines: 3,
                   textAlign: TextAlign.left,
                   overflow: TextOverflow.ellipsis,
