@@ -58,6 +58,7 @@ class PlayerWidget extends StatelessWidget {
                   ),
                 ),
               const SizedBox(width: 20),
+              // Loading
               if (player.event == GayPlayerEvent.loading)
                 const SizedBox(
                   width: 24,
@@ -67,7 +68,18 @@ class PlayerWidget extends StatelessWidget {
                     strokeWidth: 3.0,
                   ),
                 ),
-              if (player.event != GayPlayerEvent.loading)
+              // Error
+              if (player.event == GayPlayerEvent.error)
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Icon(
+                    Icons.error,
+                    color: Colors.red,
+                  ),
+                ),
+              if (player.event != GayPlayerEvent.loading &&
+                  player.event != GayPlayerEvent.error)
                 const MiniMusicVisualizer(
                   color: Colors.white,
                   width: 4,

@@ -7,6 +7,7 @@ enum GayWave {
 
 enum GayPlayerEvent {
   loading,
+  error,
   song,
   preAd,
   ad,

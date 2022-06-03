@@ -17,6 +17,8 @@ class _GayPlayerImpl {
   AudioPlayer? audioPlayer;
 
   Future<void> setupPlayer(String url, GayPlayer p) async {
+    p.mp3 = url;
+
     if (audioPlayer!.state != PlayerState.stopped) {
       await audioPlayer!.stop();
     }
@@ -73,51 +75,65 @@ class GayPlayer extends ChangeNotifier {
   final List<String> _availableAds = [];
   GayTracklist tracklist;
   GayTrack? currentTrack;
+  String errorText = "";
+  String mp3 = "";
 
   AudioPlayer? get player => _impl.audioPlayer;
 
   void playerEventHandler(PlayerState pstate) {
-    if (wave == GayWave.none) {
-      return;
-    }
+    try {
+      if (wave == GayWave.none) {
+        return;
+      }
 
-    if (pstate == PlayerState.paused) {
-      player!.resume();
-      return;
-    }
+      if (pstate == PlayerState.paused) {
+        player!.resume();
+        return;
+      }
 
-    if (pstate == PlayerState.stopped) {
-      if (_event == GayPlayerEvent.song) {
-        // Check will we play ad or not
-        // Chance: 20%
-        if (Random().nextInt(100) < 20) {
-          runPreAd();
-        } else {
-          runMusic();
+      if (pstate == PlayerState.stopped) {
+        if (_event == GayPlayerEvent.song) {
+          // Check will we play ad or not
+          // Chance: 20%
+          if (Random().nextInt(100) < 20) {
+            runPreAd();
+          } else {
+            runMusic();
+          }
+          return;
         }
-        return;
-      }
 
-      if (_event == GayPlayerEvent.preAd) {
-        runAd();
-        return;
-      }
+        if (_event == GayPlayerEvent.preAd) {
+          runAd();
+          return;
+        }
 
-      if (_event == GayPlayerEvent.ad) {
-        runPostAd();
-        return;
-      }
+        if (_event == GayPlayerEvent.ad) {
+          runPostAd();
+          return;
+        }
 
-      if (_event == GayPlayerEvent.postAd) {
+        if (_event == GayPlayerEvent.postAd) {
+          runMusic();
+          return;
+        }
+      } else if ((_event == GayPlayerEvent.loading ||
+              _event == GayPlayerEvent.error) &&
+          state != GayEventState.running) {
+        // First run case
+        state = GayEventState.running;
         runMusic();
         return;
       }
-    } else if (_event == GayPlayerEvent.loading &&
-        state != GayEventState.running) {
-      // First run case
-      state = GayEventState.running;
-      runMusic();
-      return;
+    } catch (e) {
+      player!.dispose().then(
+        (value) {
+          _event = GayPlayerEvent.error;
+          _eventState = GayEventState.loading;
+          song = "Failed to load track";
+          errorText = e.toString();
+        },
+      );
     }
   }
 
@@ -135,7 +151,9 @@ class GayPlayer extends ChangeNotifier {
 
     StreamSubscription? s;
     s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.ad) {
+      if (dur.inMilliseconds > 10 &&
+          event != GayPlayerEvent.ad &&
+          event != GayPlayerEvent.error) {
         event = GayPlayerEvent.ad;
         if (s != null) {
           s.cancel();
@@ -154,7 +172,9 @@ class GayPlayer extends ChangeNotifier {
 
     StreamSubscription? s;
     s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.postAd) {
+      if (dur.inMilliseconds > 10 &&
+          event != GayPlayerEvent.postAd &&
+          event != GayPlayerEvent.error) {
         event = GayPlayerEvent.postAd;
         if (s != null) {
           s.cancel();
@@ -173,7 +193,9 @@ class GayPlayer extends ChangeNotifier {
 
     StreamSubscription? s;
     s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.preAd) {
+      if (dur.inMilliseconds > 10 &&
+          event != GayPlayerEvent.preAd &&
+          event != GayPlayerEvent.error) {
         event = GayPlayerEvent.preAd;
         if (s != null) {
           s.cancel();
@@ -201,7 +223,9 @@ class GayPlayer extends ChangeNotifier {
 
     StreamSubscription? s;
     s = player!.onDurationChanged.listen((dur) {
-      if (dur.inMilliseconds > 10 && event != GayPlayerEvent.song) {
+      if (dur.inMilliseconds > 10 &&
+          event != GayPlayerEvent.song &&
+          event != GayPlayerEvent.error) {
         currentTrack = GayTrack(
           filename: randomTrack.filename,
           name: randomTrack.name,
