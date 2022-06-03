@@ -63,28 +63,39 @@ class _MyHomePageState extends State<MyHomePage> {
             if (snapshot.hasError) {
               return Scaffold(
                 body: Center(
-                  child: Column(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(
-                        Icons.error,
-                        color: Colors.red,
-                      ),
-                      const Text("Failed to load tracklist"),
-                      Padding(
-                        padding: EdgeInsets.symmetric(
-                          horizontal: MediaQuery.of(context).size.width / 4,
+                  child: Padding(
+                    padding: EdgeInsets.all(20),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(
+                          Icons.error,
+                          color: Colors.red,
                         ),
-                        child: Text(
-                          snapshot.error.toString(),
-                          style: GoogleFonts.robotoMono(
-                            color: Colors.grey,
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        const Text("Failed to load tracklist"),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Expanded(
+                          child: Padding(
+                            padding: EdgeInsets.symmetric(
+                              horizontal: MediaQuery.of(context).size.width / 4,
+                            ),
+                            child: Text(
+                              snapshot.error.toString(),
+                              style: GoogleFonts.robotoMono(
+                                color: Colors.grey,
+                              ),
+                              maxLines: 9999,
+                              overflow: TextOverflow.ellipsis,
+                            ),
                           ),
-                          maxLines: 50,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               );

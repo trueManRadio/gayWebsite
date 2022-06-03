@@ -84,10 +84,17 @@ class GayTracklist {
   }
 
   Future<void> network() async {
-    Response r = await Dio().get("${baseUrl}tracklist.json");
+    Response r = await Dio().get(
+      "${baseUrl}tracklist.json",
+      options: Options(
+        headers: {
+          'Content-Type': 'application/json; charset=utf-8',
+        },
+      ),
+    );
 
     if (r.statusCode != 200) {
-      _logAndThrow("Failed to load tracklist");
+      _logAndThrow("Failed to load tracklist (${r.statusCode.toString()})");
     }
 
     if (r.data.runtimeType != String) {
