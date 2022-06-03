@@ -1,16 +1,10 @@
-name: Manual workflow
+name: Build project
 
 on:
   push:
     branches: ["master"]
 
-jobs:
-  clone-compiled-code:
-    runs-on: ubuntu-latest
-    
-    steps:
-      - run: git clone 
-    
+jobs: 
   build-project:
     runs-on: ubuntu-latest
 
