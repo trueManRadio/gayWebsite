@@ -51,280 +51,335 @@ class _MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        backgroundColor: Colors.black,
-        title: Stack(
-          clipBehavior: Clip.antiAlias,
-          children: [
-            Align(
-              alignment: Alignment.centerLeft,
-              child: IconButton(
-                icon: const Icon(
-                  Icons.telegram,
-                  color: Colors.grey,
-                ),
-                onPressed: () {
-                  js.context.callMethod(
-                    "open",
-                    ["https://t.me/truemanradio"],
-                  );
-                },
-              ),
-            ),
-            Positioned.fill(
-              child: Align(
-                alignment: Alignment.center,
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    SvgPicture.asset(
-                      "assets/icon.svg",
-                      semanticsLabel: 'Logo',
-                      width: MediaQuery.of(context).size.height / 32,
-                      height: MediaQuery.of(context).size.height / 32,
-                    ),
-                    const SizedBox(
-                      width: 10,
-                    ),
-                    ShaderMask(
-                      blendMode: BlendMode.srcIn,
-                      shaderCallback: (bounds) => LinearGradient(
-                        colors: [
-                          Colors.white,
-                          Colors.white.withOpacity(0.5),
-                        ],
-                        end: Alignment.bottomLeft,
-                        begin: Alignment.topRight,
-                      ).createShader(
-                        Rect.fromLTWH(0, 0, bounds.width, bounds.height),
-                      ),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.end,
-                        children: [
-                          const Text(
-                            "TRUE MAN RADIO",
-                            style: TextStyle(
-                              fontWeight: FontWeight.w900,
-                              fontStyle: FontStyle.italic,
-                            ),
-                          ),
-                          Text(
-                            "v2.0${kDebugMode ? "-debug" : ""}",
-                            style: GoogleFonts.roboto(
-                              fontSize: 8,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
       body: SizedBox.expand(
         child: Stack(
           children: [
             AnimatedBuilder(
               animation: waveNotifier,
-              builder: (context, _) => ImageFiltered(
-                imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
-                child: AnimatedSwitcher(
-                  duration: const Duration(seconds: 1),
-                  child: waveNotifier.value == GayWave.none
-                      ? Image.asset(
-                          "assets/gym.jpg",
+              builder: (context, _) => AnimatedSwitcher(
+                duration: const Duration(seconds: 1),
+                child: waveNotifier.value == GayWave.none
+                    ? Image.asset(
+                        "assets/gym.jpg",
+                        fit: BoxFit.cover,
+                        width: MediaQuery.of(context).size.width,
+                        height: MediaQuery.of(context).size.height,
+                      )
+                    : SizedBox.expand(
+                        key: UniqueKey(),
+                        child: FittedBox(
                           fit: BoxFit.cover,
-                          width: MediaQuery.of(context).size.width,
-                          height: MediaQuery.of(context).size.height,
-                        )
-                      : SizedBox.expand(
-                          key: UniqueKey(),
-                          child: FittedBox(
-                            fit: BoxFit.cover,
-                            child: SizedBox(
-                              width: _controllers[waveNotifier.value]!
-                                  .value
-                                  .size
-                                  .width,
-                              height: _controllers[waveNotifier.value]!
-                                  .value
-                                  .size
-                                  .height,
-                              child: VideoPlayer(
-                                _controllers[waveNotifier.value]!..play(),
-                              ),
+                          child: SizedBox(
+                            width: _controllers[waveNotifier.value]!
+                                .value
+                                .size
+                                .width,
+                            height: _controllers[waveNotifier.value]!
+                                .value
+                                .size
+                                .height,
+                            child: VideoPlayer(
+                              _controllers[waveNotifier.value]!..play(),
                             ),
                           ),
                         ),
-                ),
+                      ),
               ),
             ),
-            Consumer<GayPlayer>(
-              builder: (context, value, child) {
-                if (value.event == GayPlayerEvent.error &&
-                    value.state == GayEventState.loading) {
-                  WidgetsBinding.instance.addPostFrameCallback(
-                    (timeStamp) {
-                      showDialog(
-                        context: context,
-                        builder: (context) => Dialog(
-                          child: Padding(
-                            padding: const EdgeInsets.all(20),
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                const Text(
-                                  "Error while loading track",
-                                  style: TextStyle(
-                                    fontSize: 24,
-                                  ),
-                                ),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                const Text("Error text"),
-                                Text(value.errorText,
-                                    style: GoogleFonts.robotoMono()),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                const Text("Debug info"),
-                                Text("State: ${value.state.toString()}"),
-                                Text("Event: ${value.event.toString()}"),
-                                Text("Song name: ${value.song}"),
-                                Text("mp3: ${value.mp3}"),
-                                Text("Wave: ${value.wave}"),
-                                Text(
-                                    "Volume: ${value.volume.toStringAsFixed(2)}"),
-                                const SizedBox(
-                                  height: 10,
-                                ),
-                                const Text(
-                                    "Please reload page to continue listening"),
-                              ],
+            Column(
+              children: [
+                ClipRect(
+                  child: BackdropFilter(
+                    filter: ImageFilter.blur(
+                      sigmaX: 8.0,
+                      sigmaY: 8.0,
+                    ),
+                    child: Container(
+                      decoration: BoxDecoration(
+                        color: Colors.black.withOpacity(0.85),
+                      ),
+                      child: Stack(
+                        clipBehavior: Clip.antiAlias,
+                        children: [
+                          Align(
+                            alignment: Alignment.centerLeft,
+                            child: IconButton(
+                              icon: Icon(
+                                Icons.telegram,
+                                color: Colors.white.withOpacity(0.4),
+                              ),
+                              onPressed: () {
+                                js.context.callMethod(
+                                  "open",
+                                  ["https://t.me/truemanradio"],
+                                );
+                              },
                             ),
                           ),
-                        ),
-                      );
-                    },
-                  );
-                }
-
-                return Column(
-                  children: [
-                    Expanded(
-                      child: (_visible)
-                          ? Container(
-                              decoration: BoxDecoration(
-                                color: Colors.black.withAlpha(200),
-                              ),
-                              child: Center(
-                                child: SingleChildScrollView(
-                                  child: Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      Text(
-                                        "Choose your gay wave:",
-                                        style: GoogleFonts.roboto(
-                                          fontSize: 24,
-                                          fontWeight: FontWeight.w200,
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextButton(
-                                        onPressed: (value.wave == GayWave.gay)
-                                            ? null
-                                            : () {
-                                                value.wave = GayWave.gay;
-                                              },
-                                        child: Text(
-                                          "GAY",
-                                          style: GoogleFonts.montserrat(
-                                            fontWeight: FontWeight.w900,
-                                            fontSize: 36,
-                                            color: Colors.blueGrey,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextButton(
-                                        onPressed: (value.wave ==
-                                                GayWave.trueGay)
-                                            ? null
-                                            : () {
-                                                value.wave = GayWave.trueGay;
-                                              },
-                                        child: Text(
-                                          "TRUE GAY",
-                                          style: GoogleFonts.oswald(
-                                            fontWeight: FontWeight.w900,
-                                            fontStyle: FontStyle.italic,
-                                            fontSize: 36,
-                                            color: Colors.purpleAccent,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextButton(
-                                        onPressed:
-                                            (value.wave == GayWave.sadGay)
-                                                ? null
-                                                : () {
-                                                    value.wave = GayWave.sadGay;
-                                                  },
-                                        child: Text(
-                                          "sad gay...",
-                                          style: GoogleFonts.qwigley(
-                                            fontWeight: FontWeight.w200,
-                                            fontStyle: FontStyle.italic,
-                                            fontSize: 36,
-                                            color: Colors.blue.shade200,
-                                          ),
-                                        ),
-                                      ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      TextButton(
-                                        onPressed: (value.wave == GayWave.none)
-                                            ? null
-                                            : () {
-                                                value.wave = GayWave.none;
-                                              },
-                                        child: Text(
-                                          "None",
-                                          style: GoogleFonts.roboto(
-                                            fontSize: 24,
-                                            fontWeight: FontWeight.w200,
-                                            color: Colors.blueGrey,
-                                          ),
-                                        ),
-                                      ),
-                                    ],
+                          Positioned.fill(
+                            child: Align(
+                              alignment: Alignment.center,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SvgPicture.asset(
+                                    "assets/icon.svg",
+                                    semanticsLabel: 'Logo',
+                                    width: 16,
+                                    height: 16,
                                   ),
-                                ),
+                                  const SizedBox(
+                                    width: 10,
+                                  ),
+                                  ShaderMask(
+                                    blendMode: BlendMode.srcIn,
+                                    shaderCallback: (bounds) => LinearGradient(
+                                      colors: [
+                                        Colors.white,
+                                        Colors.white.withOpacity(0.5),
+                                      ],
+                                      end: Alignment.bottomLeft,
+                                      begin: Alignment.topRight,
+                                    ).createShader(
+                                      Rect.fromLTWH(
+                                          0, 0, bounds.width, bounds.height),
+                                    ),
+                                    child: Row(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.end,
+                                      children: [
+                                        const Text(
+                                          "TRUE MAN RADIO",
+                                          style: TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                            fontStyle: FontStyle.italic,
+                                          ),
+                                        ),
+                                        Text(
+                                          "v2.0${kDebugMode ? "-debug" : ""}",
+                                          style: GoogleFonts.roboto(
+                                            fontSize: 8,
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ],
                               ),
-                            )
-                          : Container(),
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                    Consumer<GayPlayer>(
-                      builder: (context, value, child) =>
-                          (value.wave != GayWave.none)
-                              ? PlayerWidget(player: value)
-                              : Container(),
+                  ),
+                ),
+                Expanded(
+                  child: ClipRect(
+                    child: BackdropFilter(
+                      filter: ImageFilter.blur(
+                        sigmaX: 5.0,
+                        sigmaY: 5.0,
+                      ),
+                      child: Stack(
+                        children: [
+                          Consumer<GayPlayer>(
+                            builder: (context, value, child) {
+                              if (value.event == GayPlayerEvent.error &&
+                                  value.state == GayEventState.loading) {
+                                WidgetsBinding.instance.addPostFrameCallback(
+                                  (timeStamp) {
+                                    showDialog(
+                                      context: context,
+                                      builder: (context) => Dialog(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(20),
+                                          child: Column(
+                                            mainAxisSize: MainAxisSize.min,
+                                            children: [
+                                              const Text(
+                                                "Error while loading track",
+                                                style: TextStyle(
+                                                  fontSize: 24,
+                                                ),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              const Text("Error text"),
+                                              Text(value.errorText,
+                                                  style:
+                                                      GoogleFonts.robotoMono()),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              const Text("Debug info"),
+                                              Text(
+                                                  "State: ${value.state.toString()}"),
+                                              Text(
+                                                  "Event: ${value.event.toString()}"),
+                                              Text("Song name: ${value.song}"),
+                                              Text("mp3: ${value.mp3}"),
+                                              Text("Wave: ${value.wave}"),
+                                              Text(
+                                                  "Volume: ${value.volume.toStringAsFixed(2)}"),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              const Text(
+                                                  "Please reload page to continue listening"),
+                                            ],
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              }
+
+                              return Column(
+                                children: [
+                                  Expanded(
+                                    child: (_visible)
+                                        ? Container(
+                                            decoration: BoxDecoration(
+                                              color: Colors.black
+                                                  .withOpacity(0.65),
+                                            ),
+                                            child: Center(
+                                              child: SingleChildScrollView(
+                                                child: Column(
+                                                  mainAxisAlignment:
+                                                      MainAxisAlignment.center,
+                                                  children: [
+                                                    Text(
+                                                      "Choose your gay wave:",
+                                                      style: GoogleFonts.roboto(
+                                                        fontSize: 24,
+                                                        fontWeight:
+                                                            FontWeight.w200,
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: (value.wave ==
+                                                              GayWave.gay)
+                                                          ? null
+                                                          : () {
+                                                              value.wave =
+                                                                  GayWave.gay;
+                                                            },
+                                                      child: Text(
+                                                        "GAY",
+                                                        style: GoogleFonts
+                                                            .montserrat(
+                                                          fontWeight:
+                                                              FontWeight.w900,
+                                                          fontSize: 36,
+                                                          color:
+                                                              Colors.blueGrey,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: (value.wave ==
+                                                              GayWave.trueGay)
+                                                          ? null
+                                                          : () {
+                                                              value.wave =
+                                                                  GayWave
+                                                                      .trueGay;
+                                                            },
+                                                      child: Text(
+                                                        "TRUE GAY",
+                                                        style:
+                                                            GoogleFonts.oswald(
+                                                          fontWeight:
+                                                              FontWeight.w900,
+                                                          fontStyle:
+                                                              FontStyle.italic,
+                                                          fontSize: 36,
+                                                          color: Colors
+                                                              .purpleAccent,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: (value.wave ==
+                                                              GayWave.sadGay)
+                                                          ? null
+                                                          : () {
+                                                              value.wave =
+                                                                  GayWave
+                                                                      .sadGay;
+                                                            },
+                                                      child: Text(
+                                                        "sad gay...",
+                                                        style:
+                                                            GoogleFonts.qwigley(
+                                                          fontWeight:
+                                                              FontWeight.w200,
+                                                          fontStyle:
+                                                              FontStyle.italic,
+                                                          fontSize: 36,
+                                                          color: Colors
+                                                              .blue.shade200,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                    TextButton(
+                                                      onPressed: (value.wave ==
+                                                              GayWave.none)
+                                                          ? null
+                                                          : () {
+                                                              value.wave =
+                                                                  GayWave.none;
+                                                            },
+                                                      child: Text(
+                                                        "None",
+                                                        style:
+                                                            GoogleFonts.roboto(
+                                                          fontSize: 24,
+                                                          fontWeight:
+                                                              FontWeight.w200,
+                                                          color:
+                                                              Colors.blueGrey,
+                                                        ),
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          )
+                                        : Container(),
+                                  ),
+                                  Consumer<GayPlayer>(
+                                    builder: (context, value, child) =>
+                                        (value.wave != GayWave.none)
+                                            ? PlayerWidget(player: value)
+                                            : Container(),
+                                  ),
+                                ],
+                              );
+                            },
+                          ),
+                        ],
+                      ),
                     ),
-                  ],
-                );
-              },
+                  ),
+                ),
+              ],
             ),
           ],
         ),
