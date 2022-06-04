@@ -6,13 +6,20 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:truemanradio/low_performance.dart';
 import 'package:truemanradio/main_page.dart';
 import 'package:truemanradio/player.dart';
 
 // There's nothing hard to do, so I was too lazy to use OOP...
 // also I was too lazy to remove app template parts.....
 
-void main() {
+// Last low performance mode state.
+LowPerformanceModeState _lastLpState =
+    LowPerformanceModeState.waitingForUserDecision;
+
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  _lastLpState = await LowPerformanceModeInfo.getLastState();
   runApp(const MyApp());
 }
 
@@ -53,6 +60,11 @@ class _MyHomePageState extends State<MyHomePage> {
         ChangeNotifierProvider<GayPlayer>(
           create: (context) => GayPlayer(
             tracklist: context.read<GayTracklist>(),
+          ),
+        ),
+        ChangeNotifierProvider<LowPerformanceModeInfo>(
+          create: (context) => LowPerformanceModeInfo(
+            _lastLpState,
           ),
         ),
       ],
