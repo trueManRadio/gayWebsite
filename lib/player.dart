@@ -77,7 +77,7 @@ class GayPlayer extends ChangeNotifier {
   GayTrack? currentTrack;
   String errorText = "";
   String mp3 = "";
-  final Map<GayPlayerEvent, int> _eventKeys = {};
+  int? _lastSubKey;
 
   AudioPlayer? get player => _impl.audioPlayer;
 
@@ -138,12 +138,12 @@ class GayPlayer extends ChangeNotifier {
   }
 
   void _addPostLoadingAction(GayPlayerEvent ev) {
-    int thisSubKey = Random().nextInt(10000);
+    int thisSubKey = Random().nextInt(9999999);
 
     StreamSubscription? s;
-    _eventKeys[ev] = thisSubKey;
+    _lastSubKey = thisSubKey;
     s = player!.onDurationChanged.listen((dur) {
-      if ((_eventKeys[event] ?? thisSubKey) == thisSubKey &&
+      if ((_lastSubKey ?? thisSubKey) == thisSubKey &&
           dur.inMilliseconds > 10 &&
           event != ev &&
           event != GayPlayerEvent.error) {
