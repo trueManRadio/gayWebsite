@@ -9,8 +9,8 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:mini_music_visualizer/mini_music_visualizer.dart';
 import 'package:provider/provider.dart';
-import 'package:truemanradio/low_performance.dart';
-import 'package:truemanradio/player.dart';
+import 'package:truemanradio/src/saveable/low_performance.dart';
+import 'package:truemanradio/src/player/base.dart';
 
 class PlayerWidget extends StatelessWidget {
   const PlayerWidget({Key? key, required this.player}) : super(key: key);

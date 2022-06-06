@@ -7,63 +7,13 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:audioplayers/audioplayers.dart';
-import 'package:truemanradio/ad_chance.dart';
-import 'tracklist.dart';
-import 'player_types.dart';
+import 'package:truemanradio/src/saveable/ad_chance.dart';
+import 'package:truemanradio/src/player/track_list.dart';
+import 'package:truemanradio/src/player/impl.dart';
+import 'package:truemanradio/src/player/types.dart';
 
-export 'tracklist.dart';
-export 'player_types.dart';
-
-class _GayPlayerImpl {
-  AudioPlayer? audioPlayer;
-
-  Future<void> setupPlayer(String url, GayPlayer p) async {
-    p.mp3 = url;
-
-    if (audioPlayer!.state != PlayerState.stopped) {
-      await audioPlayer!.stop();
-    }
-
-    await audioPlayer!.play(
-      UrlSource(url),
-      volume: p.volume,
-      mode: PlayerMode.mediaPlayer,
-    );
-  }
-
-  Future<void> setVolume(GayPlayer p) async {
-    if (audioPlayer != null) {
-      await audioPlayer!.setVolume(p.volume);
-    }
-  }
-
-  Future<void> loadAd(GayPlayer p, String name) {
-    return setupPlayer(baseUrl + p.tracklist.adsPath + name, p);
-  }
-
-  Future<void> loadPreAd(GayPlayer p) {
-    return loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + preAdSoundName);
-  }
-
-  Future<void> loadPostAd(GayPlayer p) {
-    return loadAd(p, p.tracklist.adWaveSoundsPath[p.wave]! + postAdSoundName);
-  }
-
-  Future<void> loadMusic(GayPlayer p, String name) {
-    return setupPlayer(baseUrl + p.tracklist.wavePath[p.wave]! + name, p);
-  }
-
-  void setPlayerCallback(Function(PlayerState) handler) {
-    audioPlayer!.onPlayerStateChanged.listen(handler);
-    audioPlayer!.onPlayerComplete.listen((event) {
-      handler(PlayerState.stopped);
-    });
-  }
-
-  void initPlayer() {
-    audioPlayer = AudioPlayer();
-  }
-}
+export 'package:truemanradio/src/player/track_list.dart';
+export 'package:truemanradio/src/player/types.dart';
 
 class GayPlayer extends ChangeNotifier {
   GayWave _currentWave = GayWave.none;
@@ -71,10 +21,10 @@ class GayPlayer extends ChangeNotifier {
   GayEventState _eventState = GayEventState.running;
   String _currentSong = "Loading...";
   double _volume = 0.7;
-  final _GayPlayerImpl _impl = _GayPlayerImpl();
+  late final GayPlayerImpl _impl;
   final Map<GayWave, List<GayTrack>> _availableTracks = {};
   final List<String> _availableAds = [];
-  GayTracklist tracklist;
+  GayTrackList trackList;
   AdChanceInfo adChance;
   GayTrack? currentTrack;
   String errorText = "";
@@ -86,11 +36,6 @@ class GayPlayer extends ChangeNotifier {
   void playerEventHandler(PlayerState pstate) {
     try {
       if (wave == GayWave.none) {
-        return;
-      }
-
-      if (pstate == PlayerState.paused) {
-        player!.resume();
         return;
       }
 
@@ -128,7 +73,7 @@ class GayPlayer extends ChangeNotifier {
         return;
       }
     } catch (e) {
-      player!.dispose().then(
+      _impl.dispose().then(
         (value) {
           _eventState = GayEventState.loading;
           errorText = e.toString();
@@ -140,10 +85,10 @@ class GayPlayer extends ChangeNotifier {
 
   void _addPostLoadingAction(GayPlayerEvent ev) {
     int thisSubKey = Random().nextInt(9999999);
+    _lastSubKey = thisSubKey;
 
     StreamSubscription? s;
-    _lastSubKey = thisSubKey;
-    s = player!.onDurationChanged.listen((dur) {
+    s = _impl.setDurationCallback((dur) {
       if ((_lastSubKey ?? thisSubKey) == thisSubKey &&
           dur.inMilliseconds > 10 &&
           event != ev &&
@@ -159,35 +104,31 @@ class GayPlayer extends ChangeNotifier {
 
     // Non-annoying random
     if (_availableAds.isEmpty) {
-      _availableAds.addAll(tracklist.ads);
+      _availableAds.addAll(trackList.ads);
     }
     String randomAd = _availableAds[Random().nextInt(_availableAds.length)];
     _availableAds.remove(randomAd);
 
-    _impl.loadAd(this, randomAd);
+    _impl.loadAd(randomAd);
     _addPostLoadingAction(GayPlayerEvent.ad);
   }
 
   void runPostAd() {
     event = GayPlayerEvent.loading;
-    _impl.loadPostAd(
-      this,
-    );
+    _impl.loadPostAd();
     _addPostLoadingAction(GayPlayerEvent.postAd);
   }
 
   void runPreAd() {
     event = GayPlayerEvent.loading;
-    _impl.loadPreAd(
-      this,
-    );
+    _impl.loadPreAd();
     _addPostLoadingAction(GayPlayerEvent.preAd);
   }
 
   void runMusic() {
     // Non-annoying random
     if (_availableTracks[wave]!.isEmpty) {
-      _availableTracks[wave]!.addAll(tracklist.tracksByWaves[wave]!);
+      _availableTracks[wave]!.addAll(trackList.tracksByWaves[wave]!);
     }
     GayTrack randomTrack = _availableTracks[wave]![
         Random().nextInt(_availableTracks[wave]!.length)];
@@ -202,17 +143,14 @@ class GayPlayer extends ChangeNotifier {
 
     event = GayPlayerEvent.loading;
 
-    _impl.loadMusic(
-      this,
-      randomTrack.filename,
-    );
+    _impl.loadMusic(randomTrack.filename);
 
     _addPostLoadingAction(GayPlayerEvent.song);
   }
 
   void _addWaveTracksIfNull(GayWave w) {
     if (_availableTracks[w] == null) {
-      _availableTracks[w] = [...tracklist.tracksByWaves[w]!];
+      _availableTracks[w] = [...trackList.tracksByWaves[w]!];
     }
   }
 
@@ -223,7 +161,7 @@ class GayPlayer extends ChangeNotifier {
 
     // Init non-annoying random
     if (_availableAds.isEmpty) {
-      _availableAds.addAll(tracklist.ads);
+      _availableAds.addAll(trackList.ads);
     }
     _addWaveTracksIfNull(GayWave.gay);
     _addWaveTracksIfNull(GayWave.sadGay);
@@ -255,7 +193,7 @@ class GayPlayer extends ChangeNotifier {
     waveNotifier.value = w;
     notifyListeners();
 
-    player!.stop().then(
+    _impl.stop().then(
           (_) => Future.sync(
             () => mainThread(),
           ),
@@ -298,14 +236,15 @@ class GayPlayer extends ChangeNotifier {
 
   set volume(double d) {
     _volume = d;
-    _impl.setVolume(this);
+    _impl.updateVolume();
     notifyListeners();
   }
 
   GayPlayer({
-    required this.tracklist,
+    required this.trackList,
     required this.adChance,
   }) {
+    _impl = GayPlayerImpl(player: this);
     _impl.initPlayer();
     _impl.setPlayerCallback(playerEventHandler);
   }

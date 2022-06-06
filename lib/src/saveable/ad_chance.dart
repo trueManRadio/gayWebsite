@@ -1,4 +1,8 @@
-import 'package:flutter/material.dart';
+/*
+ * Copyright (c) True Man Radio, 2022
+ * SPDX-License-Identifier: GPL-3.0-or-later
+ */
+
 import 'package:shared_preferences/shared_preferences.dart';
 
 class AdChanceInfo {
