@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:truemanradio/ad_chance.dart';
 import 'package:truemanradio/low_performance.dart';
 import 'package:truemanradio/player.dart';
 import 'package:truemanradio/player_widget.dart';
@@ -57,6 +58,8 @@ class _MainPageState extends State<MainPage> {
     bool isDesktop = MediaQuery.of(context).size.width /
             MediaQuery.of(context).devicePixelRatio >
         700;
+
+    AdChanceInfo ad = context.read<AdChanceInfo>();
 
     LowPerformanceModeInfo lpInfo = context.read<LowPerformanceModeInfo>();
     if (lpInfo.state == LowPerformanceModeState.waitingForUserDecision) {
@@ -227,6 +230,53 @@ class _MainPageState extends State<MainPage> {
                                           ? LowPerformanceModeState.enabled
                                           : LowPerformanceModeState.disabled,
                                     ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 10),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    "Ad chance",
+                                    overflow: TextOverflow.ellipsis,
+                                    maxLines: 2,
+                                    style: GoogleFonts.roboto(
+                                      fontWeight: FontWeight.w300,
+                                      fontSize: 14,
+                                    ),
+                                  ),
+                                ),
+                                StatefulBuilder(
+                                  builder: (context, setState) => Row(
+                                    mainAxisAlignment: MainAxisAlignment.end,
+                                    children: [
+                                      Text(
+                                        "${ad.chance}%",
+                                      ),
+                                      const SizedBox(width: 10),
+                                      SizedBox(
+                                        width:
+                                            MediaQuery.of(context).size.width /
+                                                5,
+                                        child: Slider(
+                                          value: ad.chance / 100,
+                                          activeColor: Theme.of(context)
+                                              .colorScheme
+                                              .secondary
+                                              .withOpacity(0.5),
+                                          thumbColor: Theme.of(context)
+                                              .colorScheme
+                                              .secondary,
+                                          inactiveColor:
+                                              Colors.white.withOpacity(0.4),
+                                          onChanged: (v) => setState(
+                                            () => ad.chance = (v * 100).toInt(),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
                                   ),
                                 ),
                               ],

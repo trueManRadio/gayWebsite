@@ -6,6 +6,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
+import 'package:truemanradio/ad_chance.dart';
 import 'package:truemanradio/low_performance.dart';
 import 'package:truemanradio/main_page.dart';
 import 'package:truemanradio/player.dart';
@@ -16,10 +17,12 @@ import 'package:truemanradio/player.dart';
 // Last low performance mode state.
 LowPerformanceModeState _lastLpState =
     LowPerformanceModeState.waitingForUserDecision;
+int _lastAdChance = AdChanceInfo.defaultChance;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   _lastLpState = await LowPerformanceModeInfo.getLastState();
+  _lastAdChance = await AdChanceInfo.getLastChance();
   runApp(const MyApp());
 }
 
@@ -57,14 +60,20 @@ class _MyHomePageState extends State<MyHomePage> {
         Provider<GayTracklist>(
           create: (context) => GayTracklist(),
         ),
-        ChangeNotifierProvider<GayPlayer>(
-          create: (context) => GayPlayer(
-            tracklist: context.read<GayTracklist>(),
-          ),
-        ),
         ChangeNotifierProvider<LowPerformanceModeInfo>(
           create: (context) => LowPerformanceModeInfo(
             _lastLpState,
+          ),
+        ),
+        Provider<AdChanceInfo>(
+          create: (context) => AdChanceInfo(
+            lastChance: _lastAdChance,
+          ),
+        ),
+        ChangeNotifierProvider<GayPlayer>(
+          create: (context) => GayPlayer(
+            tracklist: context.read<GayTracklist>(),
+            adChance: context.read<AdChanceInfo>(),
           ),
         ),
       ],

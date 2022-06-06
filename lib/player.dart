@@ -7,6 +7,7 @@ import 'dart:async';
 import 'dart:math';
 import 'package:flutter/foundation.dart';
 import 'package:audioplayers/audioplayers.dart';
+import 'package:truemanradio/ad_chance.dart';
 import 'tracklist.dart';
 import 'player_types.dart';
 
@@ -74,6 +75,7 @@ class GayPlayer extends ChangeNotifier {
   final Map<GayWave, List<GayTrack>> _availableTracks = {};
   final List<String> _availableAds = [];
   GayTracklist tracklist;
+  AdChanceInfo adChance;
   GayTrack? currentTrack;
   String errorText = "";
   String mp3 = "";
@@ -95,8 +97,7 @@ class GayPlayer extends ChangeNotifier {
       if (pstate == PlayerState.stopped) {
         if (_event == GayPlayerEvent.song) {
           // Check will we play ad or not
-          // Chance: 20%
-          if (Random().nextInt(100) < 20) {
+          if (Random().nextInt(100 + 1) < adChance.chance) {
             runPreAd();
           } else {
             runMusic();
@@ -301,7 +302,10 @@ class GayPlayer extends ChangeNotifier {
     notifyListeners();
   }
 
-  GayPlayer({required this.tracklist}) {
+  GayPlayer({
+    required this.tracklist,
+    required this.adChance,
+  }) {
     _impl.initPlayer();
     _impl.setPlayerCallback(playerEventHandler);
   }
